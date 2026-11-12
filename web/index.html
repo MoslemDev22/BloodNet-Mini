@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BloodNet | شبکه هماهنگی خون</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">B</div><div><strong>BloodNet</strong><small>شبکه هماهنگی زنجیره خون</small></div></div>
+    <div class="side-caption">محیط عملیاتی</div>
+    <nav>
+      <button class="nav-item active" data-view="overview"><span>▦</span> نمای کلی</button>
+      <button class="nav-item" data-view="hospital"><span>＋</span> ثبت درخواست بیمارستان</button>
+      <button class="nav-item" data-view="requests"><span>▤</span> پیگیری درخواست‌ها</button>
+      <button class="nav-item" data-view="reviews"><span>✓</span> بررسی و تأیید درخواست‌ها</button>
+      <button class="nav-item" data-view="inventory"><span>▣</span> موجودی مراکز</button>
+      <button class="nav-item" data-view="donor"><span>♡</span> پرتال اهداکننده</button>
+    </nav>
+    <div class="sidebar-foot"><span class="dot"></span><span>محیط شبیه‌سازی محلی</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">سامانه یکپارچه مدیریت تأمین</div><h1 id="pageTitle">نمای کلی شبکه</h1></div>
+      <div class="top-actions"><div class="api-state" id="apiState"><i></i><span>در حال بررسی سرویس</span></div><button class="icon-btn" id="refreshBtn" title="بروزرسانی">↻</button></div>
+    </header>
+
+    <section class="view active" id="view-overview">
+      <div class="hero"><div><span class="hero-tag">BloodNet · Practice Environment</span><h2>هماهنگی سریع‌تر، پیگیری شفاف‌تر</h2><p>درخواست‌ها، موجودی سازگار و روند تأمین را در یک محیط شبیه‌سازی‌شده مدیریت کنید.</p></div><button class="btn btn-white" data-go="hospital">＋ ثبت درخواست جدید</button></div>
+      <div class="stat-grid">
+        <article class="stat-card"><span class="stat-icon red">▤</span><div><small>کل درخواست‌ها</small><strong id="statTotal">—</strong><em>درخواست ثبت‌شده</em></div></article>
+        <article class="stat-card"><span class="stat-icon amber">◷</span><div><small>در حال پیگیری</small><strong id="statOpen">—</strong><em>نیازمند اقدام</em></div></article>
+        <article class="stat-card"><span class="stat-icon blue">▣</span><div><small>واحد موجودی جاری</small><strong id="statStock">—</strong><em>از سرویس Inventory</em></div></article>
+        <article class="stat-card"><span class="stat-icon green">✓</span><div><small>تأمین کامل</small><strong id="statDone">—</strong><em>درخواست تکمیل‌شده</em></div></article>
+      </div>
+      <section class="panel"><div class="panel-head"><div><h3>آخرین درخواست‌ها</h3><p>آخرین وضعیت ثبت‌شده در سرویس اصلی</p></div><button class="link-btn" data-go="requests">مشاهده همه ←</button></div><div id="overviewRequests" class="table-holder"><div class="empty-state">در حال دریافت اطلاعات…</div></div></section>
+      <div class="notice"><b>یادآوری ایمنی:</b> تمام داده‌ها و قواعد این محیط ساختگی و مخصوص مسابقه‌اند؛ برای تصمیم‌گیری پزشکی یا انتقال خون واقعی استفاده نشوند.</div>
+    </section>
+
+    <section class="view" id="view-hospital">
+      <div class="two-col">
+        <section class="panel"><div class="panel-head"><div><h3>ثبت درخواست جدید</h3><p>مشخصات درخواست بیمارستان را وارد کنید.</p></div><span class="pill">API اصلی · POST /requests</span></div>
+          <form id="requestForm" class="form-grid">
+            <label class="full">بیمارستان درخواست‌کننده<select id="hospitalId" required><option value="">در حال دریافت فهرست…</option></select></label>
+            <label>نوع فرآورده<select id="product"><option value="red_cells">گلبول قرمز</option><option value="platelets">پلاکت</option><option value="plasma">پلاسما</option></select></label>
+            <label>گروه خونی گیرنده<select id="bloodGroup"><option>O+</option><option>A+</option><option>B+</option><option>AB+</option><option>O-</option><option>A-</option><option>B-</option><option>AB-</option></select></label>
+            <label>تعداد واحد<input id="units" type="number" min="1" max="20" value="2" required></label>
+            <label>سطح فوریت<select id="urgency"><option value="critical">بحرانی</option><option value="urgent" selected>فوری</option><option value="planned">برنامه‌ریزی‌شده</option></select></label>
+            <label class="full">یادداشت اختیاری<textarea id="note" maxlength="500" rows="3" placeholder="حداکثر ۵۰۰ نویسه"></textarea></label>
+            <div class="form-actions full"><button class="btn btn-primary" type="submit" id="submitRequest">ثبت درخواست و شروع تأمین</button><span class="muted">کلید Idempotency به‌صورت خودکار تولید می‌شود.</span></div>
+          </form><div id="createMessage" class="message hidden"></div>
+        </section>
+        <aside class="info-panel"><div class="info-symbol">i</div><h3>پس از ثبت چه اتفاقی می‌افتد؟</h3><ol><li>اعتبارسنجی بیمارستان و مشخصات درخواست</li><li>بررسی موجودی جاری از Inventory API</li><li>تخصیص سازگار با اولویت تاریخ انقضا (FEFO)</li><li>دعوت مرحله‌ای اهداکنندگان برای پوشش کسری</li><li>ثبت پاسخ‌ها و رویدادهای پیشرفت</li></ol><div class="mini-rule"><b>حداکثر تعداد:</b> ۲۰ واحد در هر درخواست</div></aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-requests">
+      <section class="panel"><div class="panel-head"><div><h3>درخواست‌های ثبت‌شده</h3><p>وضعیت و شمارنده‌ها از API اصلی خوانده می‌شوند.</p></div><button class="btn btn-primary btn-small" data-go="hospital">＋ درخواست جدید</button></div><div id="requestsTable" class="table-holder"><div class="empty-state">در حال دریافت…</div></div></section>
+      <section class="panel detail-panel hidden" id="requestDetail"><div class="panel-head"><div><h3 id="detailTitle">جزئیات درخواست</h3><p id="detailSub"></p></div><button class="link-btn" id="closeDetail">بستن ×</button></div><div id="detailStats" class="detail-stats"></div><div class="timeline" id="detailEvents"></div></section>
+    </section>
+
+    <section class="view" id="view-reviews">
+      <section class="panel"><div class="panel-head"><div><h3>صف درخواست‌های نیازمند بررسی</h3><p>فقط هماهنگ‌کننده می‌تواند درخواست‌های مشکوک را تعیین‌تکلیف کند. تا زمان تصمیم، تأمین و فراخوان اهداکننده متوقف می‌ماند.</p></div><button class="btn btn-primary btn-small" id="refreshReviews">↻ بروزرسانی</button></div><div class="review-summary" id="reviewSummary"></div><div id="reviewQueue" class="table-holder"><div class="empty-state">در حال دریافت درخواست‌ها…</div></div></section>
+      <section class="panel hidden" id="reviewDetail"><div class="panel-head"><div><h3 id="reviewTitle">بررسی درخواست</h3><p id="reviewSub"></p></div><button class="link-btn" id="closeReview">بستن ×</button></div><div id="reviewFacts" class="review-facts"></div><div class="notice review-warning"><b>کنترل ایمنی:</b> تأیید فقط پس از بررسی تناسب مقدار، فوریت، گروه خونی، فرآورده و توضیحات انجام شود. رد درخواست نیازمند ثبت دلیل است.</div><label class="review-note-label" for="reviewNote">یادداشت تصمیم هماهنگ‌کننده</label><textarea id="reviewNote" maxlength="500" rows="3" placeholder="دلیل بررسی، تأیید یا رد را بنویسید…"></textarea><div class="review-actions"><button class="btn btn-approve" id="approveRequest">✓ تأیید و شروع فرآیند تأمین</button><button class="btn btn-reject" id="rejectRequest">✕ رد درخواست</button></div><div id="reviewMessage" class="message hidden"></div><div class="timeline" id="reviewEvents"></div></section>
+    </section>
+
+    <section class="view" id="view-inventory">
+      <section class="panel"><div class="panel-head"><div><h3>موجودی جاری مراکز</h3><p>اطلاعات زنده از سرویس Inventory؛ موجودی اولیه CSV مرجع موجودی لحظه‌ای نیست.</p></div><span class="pill">مرتب‌سازی FEFO</span></div><div class="filters"><input id="inventorySearch" placeholder="جستجوی مرکز یا گروه خونی…"><select id="inventoryProduct"><option value="">همه فرآورده‌ها</option><option value="red_cells">گلبول قرمز</option><option value="platelets">پلاکت</option><option value="plasma">پلاسما</option></select></div><div id="inventoryTable" class="table-holder"><div class="empty-state">در حال دریافت…</div></div></section>
+    </section>
+
+    <section class="view" id="view-donor">
+      <div class="two-col">
+        <section class="panel"><div class="panel-head"><div><h3>پرتال اهداکننده آزمایشی</h3><p>برای نمایش تعاملی callbackها در دموی محلی</p></div><span class="pill">Demo only</span></div>
+          <form id="donorLookup" class="form-grid"><label class="full">شناسه اهداکننده<input id="donorId" value="D00001" placeholder="مثلاً D00001" required></label><label class="full">توکن دموی اهداکننده<input id="donorToken" type="password" value="donor-demo-token" required></label><div class="full form-actions"><button class="btn btn-primary" type="submit">مشاهده دعوت‌ها</button></div></form>
+          <div id="donorInvitations" class="invitation-list"><div class="empty-state">برای مشاهده دعوت‌ها شناسه اهداکننده را وارد کنید.</div></div>
+        </section>
+        <aside class="info-panel"><div class="info-symbol">♡</div><h3>چرخه اهدا</h3><p>پذیرش دعوت به معنی تأمین واحد نیست. شمارنده تأمین تنها با رویداد <code>donated</code> افزایش می‌یابد.</p><div class="mini-rule">این پرتال فقط برای دموی محلی است؛ در سناریوی مسابقه، callbackها از Gateway شبیه‌سازی‌شده می‌آیند.</div></aside>
+      </div>
+    </section>
+
+    <footer class="footer">BloodNet · نسخه تمرینی مسابقه · داده‌ها و قواعد کاملاً ساختگی</footer>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body></html>
